@@ -83,9 +83,14 @@ def clone_repo(url: str, path: str):
     # subprocess's stdout/stderr is redirected to parent's stdout/stderr
     sp.run(["cd", path, "&&", "git", "clone", url], shell=True)
 
+def update_repo(path: str):
+    sp.run(["cd", path, "&&", "git", "pull"], shell=True)
+
 def create_reqd_dirs():
     if not os.path.exists(target_path):
         os.makedirs(target_path)
+
+repo_name_list = []
 
 def fetch_repo_list():
     with open(target_path + target_file, 'w') as repo_list_file:
@@ -101,6 +106,7 @@ def fetch_repo_list():
             # for each repo in current user's profile, write its url to file
             for repo in body:
                 repo_name = repo['name']
+                repo_name_list.append(repo_name)
                 repo_url = repo['html_url']
                 repo_list_file.writelines(repo_url + '\r')
             if(not next):
@@ -110,7 +116,11 @@ def fetch_repo_list():
 def read_list_and_clone():
     with open(target_path + target_file, 'r') as repo_list_file:
         for repo_url in repo_list_file.readlines():
-            clone_repo(repo_url, target_path)
+            targ_dir = target_path + repo_name_list.pop(0)
+            if os.path.exists(targ_dir + "/.git/"):     # is this a git repo?
+                update_repo(target_path)
+            else:
+                clone_repo(repo_url, target_path)
 
 if __name__ == "__main__":
     print("Starting clone of github repositories under user:", target_user, "\n")
