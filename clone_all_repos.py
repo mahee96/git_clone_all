@@ -121,7 +121,7 @@ def read_list_and_clone():
         for repo_url in repo_list_file.readlines():
             targ_dir = target_path + repo_name_list.pop(0)
             if os.path.exists(targ_dir + "/.git/"):     # is this a git repo?
-                update_repo(target_path)
+                update_repo(targ_dir)
             else:
                 clone_repo(repo_url, target_path)
     os.chdir(curr_path)
