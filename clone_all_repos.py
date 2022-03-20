@@ -66,7 +66,7 @@ target_file     = config['repofile']
 
 # formatted values
 target_url  = "https://api.github.com/users/{}/repos?per_page={}"
-target_path = "./{}/{}/"
+target_path = "{}/{}/"
 target_url  = target_url.format(target_user, results_count)
 target_path = target_path.format(root_dir, target_user)
 
@@ -81,10 +81,12 @@ def clone_repo(url: str, path: str):
     url = url.strip()
     assert url
     # subprocess's stdout/stderr is redirected to parent's stdout/stderr
-    sp.run(["cd", path, "&&", "git", "clone", url], shell=True)
+    os.chdir(path)
+    sp.run(["git", "clone", url], shell=True)
 
 def update_repo(path: str):
-    sp.run(["cd", path, "&&", "git", "pull"], shell=True)
+    os.chdir(path)
+    sp.run(["git", "pull"], shell=True)
 
 def create_reqd_dirs():
     if not os.path.exists(target_path):
@@ -114,6 +116,7 @@ def fetch_repo_list():
             target_url = next['url']        # set to next page get() request
 
 def read_list_and_clone():
+    curr_path = os.getcwd()
     with open(target_path + target_file, 'r') as repo_list_file:
         for repo_url in repo_list_file.readlines():
             targ_dir = target_path + repo_name_list.pop(0)
@@ -121,6 +124,7 @@ def read_list_and_clone():
                 update_repo(target_path)
             else:
                 clone_repo(repo_url, target_path)
+    os.chdir(curr_path)
 
 if __name__ == "__main__":
     print("Starting clone of github repositories under user:", target_user, "\n")
