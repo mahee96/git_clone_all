@@ -1,3 +1,4 @@
+
 '''
 Copyright (c) 2021-2022 Magesh K and others
 
@@ -81,12 +82,16 @@ def clone_repo(url: str, path: str):
     url = url.strip()
     assert url
     # subprocess's stdout/stderr is redirected to parent's stdout/stderr
+    cwd = os.getcwd()
     os.chdir(path)
-    sp.run(["git", "clone", url], shell=True)
+    sp.run(["git", "clone", url])
+    os.chdir(cwd)
 
 def update_repo(path: str):
+    cwd = os.getcwd()
     os.chdir(path)
-    sp.run(["git", "pull"], shell=True)
+    sp.run(["git", "pull"])
+    os.chdir(cwd)
 
 def create_reqd_dirs():
     if not os.path.exists(target_path):
